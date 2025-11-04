@@ -28,6 +28,7 @@ Automatically refresh and apply for available Amazon shifts, saving time and ens
 ## 🧱 Architecture Overview
 
 📦 Jaat-Amazon-Shift-Helper
+
 ├── manifest.json # Extension manifest (MV3)
 ├── background.js # Core scheduler & state manager
 ├── content.js # Page automation (button detection & clicker)
