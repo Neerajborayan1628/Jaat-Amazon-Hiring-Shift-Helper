@@ -25,6 +25,8 @@ Automatically refresh and apply for available Amazon shifts, saving time and ens
 | **Lightweight & Secure** | Only requires minimal Chrome permissions and runs only on `https://hiring.amazon.ca/*`. | `manifest.json` |
 
 ---
+## 🧱 Architecture Overview
+
 📦 Jaat-Amazon-Shift-Helper
 ├── manifest.json # Extension manifest (MV3)
 ├── background.js # Core scheduler & state manager
@@ -61,5 +63,5 @@ Automatically refresh and apply for available Amazon shifts, saving time and ens
 This extension is meant for **personal productivity purposes**. Use responsibly and ensure compliance with Amazon’s terms of service.  
 
 
-## 🧱 Architecture Overview
+
 
