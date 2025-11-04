@@ -1,0 +1,188 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Amazon Job Scheduler</title>
+    <style>
+      :root { --bg:#070b14; --card:#0c1322; --muted:#8b9bb3; --accent:#22c55e; --border:#1a2640; --accent2:#06b6d4; --warn:#f59e0b; --text:#e5e7eb; }
+      body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; width: 400px; color: var(--text); background: radial-gradient(50% 60% at 10% 0%, rgba(34,197,94,.08), transparent 60%), radial-gradient(40% 50% at 90% 0%, rgba(6,182,212,.06), transparent 60%), var(--bg); }
+      body.light { --bg:#f7fafc; --card:#ffffff; --muted:#475569; --accent:#16a34a; --accent2:#0891b2; --border:#e2e8f0; --warn:#b45309; --text:#0f172a; }
+      body.light header { background: linear-gradient(180deg, rgba(34,197,94,.12), transparent), linear-gradient(180deg,#e2e8f0,#f7fafc); }
+      body.light select, body.light input { background: #ffffff; color: #0f172a; }
+      body.light .card { background: #ffffff; }
+      body.light button.secondary { background: #f1f5f9; }
+      header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(34,197,94,.12), transparent), linear-gradient(180deg,#0f172a,#0b1220); position: relative; overflow: hidden; }
+      header::after { content: ""; position: absolute; inset: -40%; background: conic-gradient(from 120deg, transparent, rgba(34,197,94,.15), rgba(6,182,212,.1), transparent 60%); filter: blur(24px); pointer-events: none; }
+      header > * { position: relative; z-index: 1; }
+      header .title { font-weight: 800; letter-spacing: .3px; font-size: 16px; }
+      header .version { color: var(--muted); font-size: 12px; }
+      .container { padding: 14px 16px; }
+      .card { background: linear-gradient(180deg, rgba(255,255,255,.02), transparent), var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin-bottom: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.35); position: relative; }
+      .card::before { content: ""; position: absolute; inset: 0; border-radius: 14px; padding: 1px; background: linear-gradient(90deg, rgba(34,197,94,.25), rgba(6,182,212,.15)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+      .row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+      .col { display: flex; flex-direction: column; gap: 6px; }
+      .grow { flex: 1; }
+      label { font-size: 12px; color: var(--muted); }
+      select, input[type="number"], input[type="text"] { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); width: 100%; background: #0b1528; color: #e5e7eb; }
+      button { padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: linear-gradient(180deg,#0f1a33,#0b1322); color: #e5e7eb; cursor: pointer; transition: transform .08s ease, box-shadow .2s ease, background .2s ease; }
+      button:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(0,0,0,.45); background: linear-gradient(180deg,#111f3d,#0d1629); }
+      button:active { transform: translateY(0); box-shadow: none; }
+      button.primary { background: linear-gradient(180deg, var(--accent), #16a34a); color: #07101e; border: none; font-weight: 700; letter-spacing: .2px; }
+      button.secondary { background: linear-gradient(180deg,#0b172d,#08101f); }
+      .statusRow { display: flex; align-items: center; gap: 10px; }
+      .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px rgba(34,197,94,.4); animation: pulse 1.6s infinite; }
+      .dot.stopped { background: #6b7280; box-shadow: none; animation: none; }
+      .dot.running { background: #16a34a; }
+      .dot.success { background: #22c55e; }
+      .dot.retrying { background: var(--warn); box-shadow: 0 0 10px rgba(245,158,11,.4); }
+      @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+      .switch { position: relative; width: 50px; height: 28px; display: inline-block; pointer-events: auto; }
+      .switch input { display: none; }
+      .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #2a3a5a; border-radius: 999px; transition: .2s; box-shadow: inset 0 2px 6px rgba(0,0,0,.4); }
+      .slider:before { content: ""; position: absolute; height: 22px; width: 22px; left: 3px; top: 3px; background: linear-gradient(180deg,#e5e7eb,#cbd5e1); border-radius: 50%; transition: .2s; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+      input:checked + .slider { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+      input:checked + .slider:before { transform: translateX(22px); }
+      .chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid var(--border); border-radius: 12px; max-height: 130px; overflow: auto; background: #0b1528; }
+      .chip { background: linear-gradient(180deg,#0f172a,#0b1528); border: 1px solid var(--border); padding: 6px 8px; border-radius: 999px; display: flex; align-items: center; gap: 6px; font-size: 12px; }
+      .chip button { background: transparent; color: #e5e7eb; border: none; padding: 0 4px; cursor: pointer; }
+      .footerBtns { display: flex; gap: 8px; }
+      .glow { position: relative; }
+      .glow::after { content: ""; position: absolute; inset: -2px; border-radius: 14px; background: conic-gradient(from 180deg, #22c55e, #06b6d4, #f59e0b, #22c55e); filter: blur(14px); opacity: .25; z-index: -1; }
+      .pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 10px; background: #0b1528; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; }
+      .alert { display:none; background: #3f1d1d; border:1px solid #7f1d1d; color:#fecaca; padding:8px 10px; border-radius:10px; margin-bottom:10px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="icons/icon48.svg" width="20" height="20" alt="" />
+      <div class="title">Jaat</div>
+      <div class="version">v1.10.x</div>
+      <div class="grow"></div>
+      <button id="activateButton" class="primary">Activate</button>
+    </header>
+    <div class="container">
+      <div id="alert" class="alert">Extension background not reachable. Click Reload in chrome://extensions and try again.</div>
+      <div class="card">
+        <div class="row">
+          <div class="pill">Theme</div>
+          <div class="grow"></div>
+          <button id="themeToggle" class="secondary">Switch theme</button>
+        </div>
+        <div class="row">
+          <div class="col grow">
+            <label for="includeKw">Include keywords (comma-separated)</label>
+            <input id="includeKw" type="text" placeholder="night, toronto, full time" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col grow">
+            <label for="excludeKw">Exclude keywords (comma-separated)</label>
+            <input id="excludeKw" type="text" placeholder="part time, contractor" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col grow">
+            <label for="soundSelect">Notification sound</label>
+            <div class="row">
+              <select id="soundSelect" class="grow">
+                <option value="off">Off</option>
+                <option value="chime">Chime</option>
+                <option value="ding">Ding</option>
+                <option value="pop">Pop</option>
+                <option value="custom">Custom</option>
+              </select>
+              <button id="testSound" class="secondary" title="Play selected sound">Test</button>
+              <button id="uploadSound" class="secondary" title="Import audio file">Upload</button>
+            </div>
+            <div class="row">
+              <label style="min-width:100px">Volume</label>
+              <input id="volumeRange" type="range" min="0" max="1" step="0.05" value="1" class="grow" />
+              <label style="min-width:100px">Repeat</label>
+              <button id="repeatToggle" class="secondary">Off</button>
+            </div>
+          </div>
+          <div class="col">
+            <label for="pauseOnSuccess">Pause on success</label>
+            <button id="pauseOnSuccess" class="secondary">Off</button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col grow">
+          <label for="citySelect">City</label>
+          <select id="citySelect">
+            <option value="Toronto">Toronto</option>
+            <option value="Mississauga">Mississauga</option>
+            <option value="Hamilton">Hamilton</option>
+            <option value="Ottawa">Ottawa</option>
+            <option value="Ajax">Ajax</option>
+            <option value="Scarborough">Scarborough</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col grow">
+          <label for="distanceKm">Distance (km)</label>
+          <select id="distanceKm">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col grow">
+          <label for="workHours">Work Hours</label>
+          <select id="workHours">
+            <option value="Any" selected>Any</option>
+            <option value="Day">Day</option>
+            <option value="Night">Night</option>
+            <option value="Weekend">Weekend</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col grow">
+          <label>Cities</label>
+          <div id="cityChips" class="chips"></div>
+          <div class="row">
+            <input id="cityInput" class="grow" type="text" placeholder="Type a city and press Enter" />
+            <button id="clearCities" class="secondary">Clear all</button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col grow">
+          <label for="interval">Refresh interval (seconds)</label>
+          <input id="interval" type="number" min="1" step="1" value="10" />
+        </div>
+      </div>
+      <div class="row statusRow">
+        <span class="dot stopped" id="statusDot"></span>
+        <span class="status" id="statusText">Stopped</span>
+        <div class="grow"></div>
+        <div class="footerBtns">
+          <button id="resetBtn" class="secondary glow">Reset</button>
+          <button id="exportBtn" class="secondary">Export</button>
+          <button id="importBtn" class="primary">Import</button>
+          <button id="testDetect" class="secondary" title="Highlight first detected job">Test detect</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div class="pill">Action log</div>
+        </div>
+        <div id="actionLog" style="max-height:140px; overflow:auto; font-size:12px; color: var(--muted);"></div>
+      </div>
+    </div>
+    <input id="importFile" type="file" accept="application/json" style="display:none" />
+    <input id="customSoundFile" type="file" accept="audio/*" style="display:none" />
+    <script src="popup.js" type="module"></script>
+  </body>
+  </html>
+
+
+

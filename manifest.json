@@ -1,0 +1,62 @@
+{
+  "manifest_version": 3,
+  "name": "Jaat - Amazon Hiring Shift Helper",
+  "version": "1.0.0",
+  "description": "Auto-refresh and auto-apply/claim shifts on hiring.amazon.ca with Start/Stop control and live status.",
+  "icons": {
+    "16": "icons/icon16.svg",
+    "48": "icons/icon48.svg",
+    "128": "icons/icon128.svg"
+  },
+  "action": {
+    "default_title": "Jaat",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.svg",
+      "48": "icons/icon48.svg",
+      "128": "icons/icon128.svg"
+    }
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "alarms",
+    "offscreen",
+    "downloads",
+    "notifications",
+    "scripting"
+  ],
+  "commands": {
+    "toggle-activate": {
+      "suggested_key": { "default": "Alt+Shift+A" },
+      "description": "Toggle Activate/Stop"
+    },
+    "test-sound": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "Play test sound"
+    },
+    "toggle-theme": {
+      "suggested_key": { "default": "Alt+Shift+T" },
+      "description": "Toggle dark/light theme"
+    }
+  },
+  "host_permissions": [
+    "https://hiring.amazon.ca/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://hiring.amazon.ca/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "minimum_chrome_version": "110"
+}
+
+
